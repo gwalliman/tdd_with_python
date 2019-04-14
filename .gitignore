@@ -6,3 +6,5 @@ virtualenv
 /lists/static
 /lib
 /lib/*
+lib
+lib/*
