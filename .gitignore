@@ -3,7 +3,6 @@ geckodriver.log
 virtualenv
 *.pyc
 /static
-/lists/static
 /lib
 /lib/*
 lib
