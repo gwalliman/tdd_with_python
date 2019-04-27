@@ -1,13 +1,13 @@
 [Unit]
-Description=Gunicorn server for <DOMAIN> 
+Description=Gunicorn server for DOMAIN 
 
 [Service]
 Restart=on-failure
-User=<USERNAME>
-WorkingDirectory=<PATH/TO/DJANGO/ROOT>
-EnvironmentFile=<PATH/TO/DJANGO/ROOT>/.env
+User=ubuntu
+WorkingDirectory=/home/ubuntu/sites/DOMAIN
+EnvironmentFile=/home/ubuntu/sites/DOMAIN/.env
 
-ExecStart=<PATH/TO/DJANGO/ROOT>/gunicorn_start.sh
+ExecStart=/home/ubuntu/sites/DOMAIN/gunicorn_start.sh
 
 [Install]
 WantedBy=multi-user.target
