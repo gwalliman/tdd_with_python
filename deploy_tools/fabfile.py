@@ -7,12 +7,14 @@ REPO_URL = 'https://github.com/gwalliman/tdd_with_python'
 def deploy():
     site_folder = f'/home/{env.user}/sites/{env.host}'
     run(f'mkdir -p {site_folder}')
+    run('sudo apt-get install -y nginx python3-venv git')
     with cd(site_folder):
         _get_latest_source()
         _update_virtualenv()
         _create_or_update_dotenv()
         _update_static_files()
         _update_database()
+        _setup_nginx_and_gunicorn()
 
 def _get_latest_source():
     if exists('.git'):
@@ -42,3 +44,15 @@ def _update_static_files():
 
 def _update_database():
     run('./virtualenv/bin/python manage.py migrate --noinput') #noinput removes y/n confirmations
+
+def _setup_nginx_and_gunicorn():
+    run(f'cat /home/{env.user}/sites/{env.host}/deploy_tools/nginx.template.conf | sed "s/DOMAIN/{env.host}/g" | sudo tee /etc/nginx/sites-available/{env.host}')
+    run(f'sudo ln -sf /etc/nginx/sites-available/{env.host} /etc/nginx/sites-enabled/{env.host}')
+    run('sudo rm -f /etc/nginx/sites-enabled/default')
+    run(f'cat /home/{env.user}/sites/{env.host}/deploy_tools/gunicorn-systemd.template.service | sed "s/DOMAIN/{env.host}/g" | sudo tee /etc/systemd/system/gunicorn-{env.host}.service')
+    run(f'cat /home/{env.user}/sites/{env.host}/deploy_tools/gunicorn_start.template.sh | sed "s/DOMAIN/{env.host}/g" | sudo tee /home/{env.user}/sites/{env.host}/gunicorn_start.sh')
+    run(f'sudo chmod +x /home/{env.user}/sites/{env.host}/gunicorn_start.sh')
+    run('sudo systemctl daemon-reload')
+    run('sudo systemctl reload nginx')
+    run(f'sudo systemctl enable gunicorn-{env.host}.service')
+    run(f'sudo systemctl start gunicorn-{env.host}.service')
